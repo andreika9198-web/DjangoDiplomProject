@@ -1,0 +1,5 @@
+mssql-django
+python-dotenv
+Pillow
+flake8
+autopep8
