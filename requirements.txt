@@ -1,5 +1,9 @@
+django
 mssql-django
+pyodbc
 python-dotenv
 Pillow
+djangorestframework
+django-cors-headers
 flake8
 autopep8
