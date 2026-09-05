@@ -1,7 +1,18 @@
 from django.contrib import admin
-from django.urls import path, include
+from .models import Plant, SensorData, WateringLog
 
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('plants.urls')),  # теперь главная страница будет твоя
-]
+@admin.register(Plant)
+class PlantAdmin(admin.ModelAdmin):
+    list_display = ('name', 'min_humidity', 'max_humidity', 'is_active', 'owner')
+    list_filter = ('is_active', 'owner')
+    search_fields = ('name',)
+
+@admin.register(SensorData)
+class SensorDataAdmin(admin.ModelAdmin):
+    list_display = ('plant', 'humidity', 'temperature', 'created_at')
+    list_filter = ('plant', 'created_at')
+
+@admin.register(WateringLog)
+class WateringLogAdmin(admin.ModelAdmin):
+    list_display = ('plant', 'source', 'duration', 'success', 'started_at')
+    list_filter = ('source', 'success', 'plant')
