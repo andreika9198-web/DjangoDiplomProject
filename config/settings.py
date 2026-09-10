@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-jxe5$s*6#&2_+aznpzg8ieh4dsd$l0_o3nq4fa(fma=6bc3tb^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.0.106', '192.168.0.101']
 
 
 # Application definition
@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # project apps
+    'rest_framework',
     'plants',
 ]
 
