@@ -57,3 +57,16 @@ class WateringLog(models.Model):
         verbose_name = "Лог полива"
         verbose_name_plural = "Логи поливов"
         ordering = ['-started_at']
+
+class DeviceState(models.Model):
+    automatic = models.BooleanField(default=True, verbose_name="Автоматический режим")
+    pump = models.BooleanField(default=False, verbose_name="Полив включён")
+    light = models.BooleanField(default=False, verbose_name="Свет включён")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Состояние устройства"
+        verbose_name_plural = "Состояния устройств"
+
+    def __str__(self):
+        return f"Auto: {self.automatic}, Pump: {self.pump}, Light: {self.light}"
