@@ -8,7 +8,7 @@ from .models import SensorData, DeviceState
 from .serializers import SensorDataSerializer
 
 def index(request):
-    return HttpResponse("Привет, мир! Это умный полив.")
+    return render(request, 'index.html', {'title': 'Главная'})
 
 class SensorDataAPIView(APIView):
     def post(self, request):
@@ -36,3 +36,29 @@ class DeviceStateAPIView(APIView):
             "pump": state.pump,
             "light": state.light,
         })
+
+    def post(self, request):
+        """Обновление состояния через кнопки"""
+        state = DeviceState.objects.order_by('-updated_at').first()
+        if state is None:
+            state = DeviceState.objects.create(automatic=True, pump=False, light=False)
+
+        # Обновляем переданные поля
+        if 'automatic' in request.data:
+            state.automatic = request.data['automatic']
+        if 'pump' in request.data:
+            state.pump = request.data['pump']
+        if 'light' in request.data:
+            state.light = request.data['light']
+
+        state.save()
+        return Response({"ok": True})
+
+def control(request):
+    state = DeviceState.objects.order_by('-updated_at').first()
+    if state is None:
+        state = DeviceState.objects.create(automatic=True, pump=False, light=False)
+    return render(request, 'control.html', {
+        'title': 'Управление',
+        'state': state,
+    })
