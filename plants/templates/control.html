@@ -5,16 +5,37 @@
 <h2 class="mb-4">🎛 Панель управления</h2>
 
 <!-- ===== ВИДЕО ===== -->
+<!-- ===== ВИДЕО ===== -->
 <div class="row mb-4">
     <div class="col-md-8 mx-auto">
         <div class="card-plant text-center">
             <h5>📹 Видеонаблюдение</h5>
             <div class="video-container mt-3">
-                <img src="http://192.168.0.106:8080/video"
-                     alt="Поток с камеры"
-                     class="img-fluid rounded"
-                     style="max-height: 400px; background: #000;">
+                {% if camera.is_on %}
+                    <img src="{% url 'plants:video_feed' %}?t={% now 'U' %}"
+                         alt="Поток с камеры"
+                         class="img-fluid rounded"
+                         style="max-height: 400px; background: #000; width: 100%;">
+                {% else %}
+                    <img src="/media/camera_off.png"
+                         alt="Камера выключена"
+                         class="img-fluid rounded"
+                         style="max-height: 400px; width: 100%;">
+                {% endif %}
             </div>
+
+            <div class="mt-3">
+                {% if camera.is_on %}
+                    <button class="btn btn-danger" onclick="setCamera(false)">
+                        ⏹ Отключить камеру
+                    </button>
+                {% else %}
+                    <button class="btn btn-success" onclick="setCamera(true)">
+                        📷 Включить камеру
+                    </button>
+                {% endif %}
+            </div>
+
             <p class="text-muted mt-2 small">Поток с ESP32-CAM или USB-камеры</p>
         </div>
     </div>
@@ -87,6 +108,11 @@
                 <p><strong>Автоматический режим:</strong> <span id="state-automatic">—</span></p>
                 <p><strong>Полив:</strong> <span id="state-pump">—</span></p>
                 <p><strong>Свет:</strong> <span id="state-light">—</span></p>
+                <p><strong>Камера:</strong>
+                    <span class="status-badge {% if camera.is_on %}status-ok{% else %}status-danger{% endif %}">
+                        {% if camera.is_on %}✅ ВКЛ{% else %}❌ ВЫКЛ{% endif %}
+                    </span>
+                <p>
             </div>
         </div>
     </div>

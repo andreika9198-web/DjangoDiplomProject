@@ -1,3 +1,8 @@
+// =====================================================
+// control.js — логика панели управления умным поливом
+// =====================================================
+
+// ===== Отправка команды состояния =====
 function setState(field, value) {
     fetch('/api/state/', {
         method: 'POST',
@@ -10,9 +15,29 @@ function setState(field, value) {
     .then(response => response.json())
     .then(data => {
         console.log('OK:', data);
-        location.reload();  // перезагружаем страницу, чтобы увидеть изменения
+        location.reload();
     })
     .catch(error => console.error('Ошибка:', error));
+}
+
+// ===== Управление камерой =====
+function setCamera(value) {
+    console.log('setCamera вызвана с:', value);
+
+    fetch('/api/camera/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ is_on: value })
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log('Camera OK:', data);
+        location.reload();
+    })
+    .catch(error => console.error('Ошибка камеры:', error));
 }
 
 // ===== Загрузка текущего состояния =====

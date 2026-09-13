@@ -70,3 +70,15 @@ class DeviceState(models.Model):
 
     def __str__(self):
         return f"Auto: {self.automatic}, Pump: {self.pump}, Light: {self.light}"
+
+class CameraState(models.Model):
+    """Состояние камеры"""
+    is_on = models.BooleanField(default=False, verbose_name="Камера включена")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Обновлено")
+
+    class Meta:
+        verbose_name = "Состояние камеры"
+        verbose_name_plural = "Состояния камеры"
+
+    def __str__(self):
+        return f"Камера: {'ВКЛ' if self.is_on else 'ВЫКЛ'}"

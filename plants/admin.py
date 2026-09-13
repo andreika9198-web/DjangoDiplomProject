@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Plant, SensorData, WateringLog, DeviceState
+from .models import Plant, SensorData, WateringLog, DeviceState, CameraState
 
 @admin.register(Plant)
 class PlantAdmin(admin.ModelAdmin):
@@ -21,3 +21,7 @@ class WateringLogAdmin(admin.ModelAdmin):
 class DeviceStateAdmin(admin.ModelAdmin):
     list_display = ('automatic', 'pump', 'light', 'updated_at')
     list_filter = ('automatic', 'pump', 'light')
+
+@admin.register(CameraState)
+class CameraStateAdmin(admin.ModelAdmin):
+    list_display = ('is_on', 'updated_at')
