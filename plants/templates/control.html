@@ -17,7 +17,7 @@
                          class="img-fluid rounded"
                          style="max-height: 400px; background: #000; width: 100%;">
                 {% else %}
-                    <img src="/media/camera_off.png"
+                    <img src="{% static 'camera_off.png' %}"
                          alt="Камера выключена"
                          class="img-fluid rounded"
                          style="max-height: 400px; width: 100%;">
@@ -36,7 +36,7 @@
                 {% endif %}
             </div>
 
-            <p class="text-muted mt-2 small">Поток с ESP32-CAM или USB-камеры</p>
+            <p class="text-muted mt-2 small">Поток с USB-камеры</p>
         </div>
     </div>
 </div>
