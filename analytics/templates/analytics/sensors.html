@@ -9,6 +9,7 @@
         <h3 class="mb-3 mt-4">🌱 {{ item.plant.name }}</h3>
 
         {% if item.latest %}
+        <!-- ===== КАРТОЧКИ С ДАННЫМИ ===== -->
         <div class="row mb-4" data-plant-id="{{ item.plant.id }}">
             <div class="col-md-6 mb-3">
                 <div class="card-plant text-center">
@@ -37,7 +38,19 @@
                 </div>
             </div>
         </div>
+
+        {% else %}
+        <!-- ===== ЗАГЛУШКА ===== -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="alert alert-warning text-center">
+                    📭 Нет данных для {{ item.plant.name }}.
+                    Подключите датчик или добавьте данные вручную.
+                </div>
+            </div>
+        </div>
         {% endif %}
+
     {% endfor %}
 </div>
 
