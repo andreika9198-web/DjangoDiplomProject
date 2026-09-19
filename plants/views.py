@@ -6,7 +6,7 @@ from rest_framework import status
 import cv2
 from django.http import StreamingHttpResponse, HttpResponse
 
-from .models import SensorData, DeviceState, CameraState
+from .models import SensorData, DeviceState, CameraState, Plant
 from .serializers import SensorDataSerializer, CameraStateSerializer, WateringLogSerializer
 
 def index(request):
@@ -135,3 +135,22 @@ class WateringLogAPIView(APIView):
             {"error": serializer.errors},
             status=status.HTTP_400_BAD_REQUEST
         )
+
+
+def plants_list(request):
+    """Страница со всеми растениями"""
+    plants = Plant.objects.filter(is_active=True)
+
+    # Добавляем последние данные для каждого растения
+    plants_data = []
+    for plant in plants:
+        latest = SensorData.objects.filter(plant=plant).order_by('-created_at').first()
+        plants_data.append({
+            'plant': plant,
+            'latest': latest,
+        })
+
+    return render(request, 'plants_list.html', {
+        'title': 'Все растения',
+        'plants_data': plants_data,
+    })

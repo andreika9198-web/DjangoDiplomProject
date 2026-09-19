@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4">🌿 Все растения</h2>
+
+<div class="row">
+    {% for item in plants_data %}
+    <div class="col-md-4 mb-3">
+        <div class="card-plant">
+            <h4 class="mb-3">🌱 {{ item.plant.name }}</h4>
+
+            <p class="mb-1">
+                <strong>Порог влажности:</strong>
+                {{ item.plant.min_humidity }}% — {{ item.plant.max_humidity }}%
+            </p>
+            <p class="mb-1">
+                <strong>Владелец:</strong> {{ item.plant.owner.username }}
+            </p>
+            <p class="mb-3">
+                <strong>Статус:</strong>
+                {% if item.plant.is_active %}
+                    <span class="status-badge status-ok">✅ Активно</span>
+                {% else %}
+                    <span class="status-badge status-danger">❌ Отключено</span>
+                {% endif %}
+            </p>
+
+            {% if item.latest %}
+            <p class="text-muted small mb-3">
+                💧 Влажность: <strong>{{ item.latest.humidity|floatformat:1 }}%</strong><br>
+                🌡 Температура: <strong>{{ item.latest.temperature|floatformat:1 }}°C</strong><br>
+                🕐 Обновлено: {{ item.latest.created_at|date:"d.m.Y H:i" }}
+            </p>
+            {% else %}
+            <p class="text-muted small mb-3">📭 Нет данных</p>
+            {% endif %}
+
+            <div class="d-grid gap-2">
+                <a href="{% url 'analytics:plant_chart' item.plant.id %}" class="btn btn-success btn-sm">
+                    📈 График
+                </a>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12">
+        <div class="alert alert-warning text-center">
+            Нет активных растений. Добавьте в админке.
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

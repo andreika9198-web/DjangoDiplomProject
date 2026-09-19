@@ -33,7 +33,7 @@
                            data-toggle="dropdown">🌿 Растения</a>
                         <ul class="dropdown-menu" aria-labelledby="plantsDropdown">
                             <li><a class="dropdown-item" href="{% url 'plants:control' %}">🎛 Контроль параметров</a></li>
-                            <li><a class="dropdown-item" href="/admin/plants/plant/">📋 Все растения</a></li>
+                            <li><a class="dropdown-item" href="{% url 'plants:plants_list' %}">📋 Все растения</a></li>
                             <li><a class="dropdown-item" href="/admin/plants/plant/add/">➕ Добавить растение</a></li>
                         </ul>
                     </li>
