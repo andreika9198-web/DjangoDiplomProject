@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4">➕ Добавить растение</h2>
+
+<div class="row">
+    <div class="col-12 col-md-8 col-lg-6 mx-auto">
+        <div class="card-plant">
+            <form method="post">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {{ form.non_field_errors }}
+                </div>
+                {% endif %}
+
+                <!-- Название -->
+                <div class="mb-3">
+                    <label for="{{ form.name.id_for_label }}" class="form-label">
+                        {{ form.name.label }}
+                    </label>
+                    {{ form.name }}
+                    {% if form.name.errors %}
+                    <div class="text-danger small mt-1">
+                        {{ form.name.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Пороги влажности -->
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <label for="{{ form.min_humidity.id_for_label }}" class="form-label">
+                            {{ form.min_humidity.label }}
+                        </label>
+                        {{ form.min_humidity }}
+                        {% if form.min_humidity.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.min_humidity.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="col-6 mb-3">
+                        <label for="{{ form.max_humidity.id_for_label }}" class="form-label">
+                            {{ form.max_humidity.label }}
+                        </label>
+                        {{ form.max_humidity }}
+                        {% if form.max_humidity.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ form.max_humidity.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Активно -->
+                <div class="form-check mb-4">
+                    {{ form.is_active }}
+                    <label class="form-check-label" for="{{ form.is_active.id_for_label }}">
+                        {{ form.is_active.label }}
+                    </label>
+                </div>
+
+                <!-- Кнопки -->
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-success flex-grow-1">
+                        💾 Сохранить
+                    </button>
+                    <a href="{% url 'plants:plants_list' %}" class="btn btn-outline-secondary">
+                        ❌ Отмена
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

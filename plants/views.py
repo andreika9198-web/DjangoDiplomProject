@@ -169,3 +169,25 @@ def device_state_page(request):
         'state': state,
         'camera': camera_state,
     })
+
+
+from django.shortcuts import render, redirect
+from .forms import PlantForm
+
+
+def plant_add(request):
+    """Страница добавления растения"""
+    if request.method == 'POST':
+        form = PlantForm(request.POST)
+        if form.is_valid():
+            plant = form.save(commit=False)
+            plant.owner = request.user  # ← назначаем владельца
+            plant.save()
+            return redirect('plants:plants_list')
+    else:
+        form = PlantForm()
+
+    return render(request, 'plant_add.html', {
+        'title': 'Добавить растение',
+        'form': form,
+    })
