@@ -1,5 +1,4 @@
-from django.db import models
-
+from django.conf import settings
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -11,7 +10,12 @@ class Plant(models.Model):
     min_humidity = models.IntegerField(default=30, verbose_name="Нижний порог влажности %")
     max_humidity = models.IntegerField(default=70, verbose_name="Верхний порог влажности %")
     is_active = models.BooleanField(default=True, verbose_name="Активно")
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='plants', verbose_name="Владелец")
+    owner = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name='plants',
+        verbose_name="Владелец"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

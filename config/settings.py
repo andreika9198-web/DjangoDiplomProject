@@ -44,6 +44,7 @@ INSTALLED_APPS = [
 
     # project apps
     'rest_framework',
+    'users',
     'plants',
     'analytics'
 ]
@@ -159,7 +160,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # LOGIN_REDIRECT_URL = 'games:index'
 # # LOGOUT_REDIRECT_URL ='games:index'
 # LOGIN_URL = 'users:user_login'
-
+AUTH_USER_MODEL = 'users.User'
+LOGIN_URL = 'users:user_login'
+LOGIN_REDIRECT_URL = 'plants:index'
+LOGOUT_REDIRECT_URL = 'plants:index'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.yandex.ru'
 EMAIL_PORT = 465
