@@ -35,9 +35,15 @@
             <p class="text-muted small mb-3">📭 Нет данных</p>
             {% endif %}
 
-            <div class="d-grid gap-2">
+            <div class="d-flex flex-column gap-2">
                 <a href="{% url 'analytics:plant_chart' item.plant.id %}" class="btn btn-success btn-sm">
-                    📈 График
+                📈 График
+                </a>
+                <a href="{% url 'plants:plant_edit' item.plant.id %}" class="btn btn-outline-primary btn-sm">
+                    📝 Редактировать
+                </a>
+                <a href="{% url 'plants:plant_delete' item.plant.id %}" class="btn btn-outline-danger btn-sm">
+                    🗑 Удалить
                 </a>
             </div>
         </div>

@@ -191,3 +191,41 @@ def plant_add(request):
         'title': 'Добавить растение',
         'form': form,
     })
+
+
+from django.shortcuts import render, redirect, get_object_or_404
+from .forms import PlantForm
+from .models import Plant, SensorData
+
+
+def plant_edit(request, plant_id):
+    """Редактирование растения"""
+    plant = get_object_or_404(Plant, id=plant_id)
+
+    if request.method == 'POST':
+        form = PlantForm(request.POST, instance=plant)
+        if form.is_valid():
+            form.save()
+            return redirect('plants:plants_list')
+    else:
+        form = PlantForm(instance=plant)
+
+    return render(request, 'plant_edit.html', {
+        'title': f'Редактировать: {plant.name}',
+        'form': form,
+        'plant': plant,
+    })
+
+
+def plant_delete(request, plant_id):
+    """Удаление растения"""
+    plant = get_object_or_404(Plant, id=plant_id)
+
+    if request.method == 'POST':
+        plant.delete()
+        return redirect('plants:plants_list')
+
+    return render(request, 'plant_delete.html', {
+        'title': f'Удалить: {plant.name}',
+        'plant': plant,
+    })

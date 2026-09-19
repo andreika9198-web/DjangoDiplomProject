@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4">🗑 Удалить: {{ plant.name }}</h2>
+
+<div class="row">
+    <div class="col-12 col-md-8 col-lg-6 mx-auto">
+        <div class="card-plant text-center">
+            <div class="alert alert-danger">
+                <h4>⚠️ Вы уверены?</h4>
+                <p class="mb-0">
+                    Растение <strong>{{ plant.name }}</strong> 
+                    и все его данные (показания, логи поливов) будут удалены.
+                </p>
+            </div>
+
+            <p class="text-muted">Это действие нельзя отменить.</p>
+
+            <form method="post" class="d-flex gap-2 justify-content-center">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">
+                    🗑 Да, удалить
+                </button>
+                <a href="{% url 'plants:plants_list' %}" class="btn btn-outline-secondary">
+                    ❌ Отмена
+                </a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
