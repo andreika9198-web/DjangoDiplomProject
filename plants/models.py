@@ -41,7 +41,6 @@ class WateringLog(models.Model):
     SOURCES = [
         ('auto', 'Автоматический'),
         ('manual', 'Ручной (сайт)'),
-        ('vk', 'Ручной (VK бот)'),
     ]
     plant = models.ForeignKey(Plant, on_delete=models.CASCADE, related_name='watering_logs')
     started_at = models.DateTimeField(auto_now_add=True)
@@ -49,6 +48,9 @@ class WateringLog(models.Model):
     source = models.CharField(max_length=20, choices=SOURCES, default='auto', verbose_name="Источник")
     success = models.BooleanField(default=True, verbose_name="Успешно")
     comment = models.CharField(max_length=255, verbose_name="Комментарий", **NULLABLE)
+    start_watering_time = models.CharField(max_length=50, verbose_name="Время начала", **NULLABLE)
+    end_watering_time = models.CharField(max_length=50, verbose_name="Время окончания", **NULLABLE)
+
 
     def __str__(self):
         return f"Полив {self.plant.name} - {self.source} ({self.started_at.strftime('%H:%M')})"

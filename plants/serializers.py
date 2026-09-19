@@ -26,5 +26,5 @@ class WateringLogSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = WateringLog
-        fields = ['plant', 'duration', 'source', 'success', 'comment']
+        fields = ['plant', 'duration', 'source', 'success', 'comment', 'start_watering_time', 'end_watering_time',]
         read_only_fields = ['started_at']

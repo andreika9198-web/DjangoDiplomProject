@@ -14,8 +14,13 @@ class SensorDataAdmin(admin.ModelAdmin):
 
 @admin.register(WateringLog)
 class WateringLogAdmin(admin.ModelAdmin):
-    list_display = ('plant', 'source', 'duration', 'success', 'started_at')
+    list_display = (
+        'plant', 'source', 'duration',
+        'start_watering_time', 'end_watering_time',
+        'success', 'started_at'
+    )
     list_filter = ('source', 'success', 'plant')
+    search_fields = ('plant__name',)
 
 @admin.register(DeviceState)
 class DeviceStateAdmin(admin.ModelAdmin):
