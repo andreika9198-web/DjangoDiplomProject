@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import SensorData, Plant, CameraState
+from .models import SensorData, Plant, CameraState,WateringLog
 
 class SensorDataSerializer(serializers.ModelSerializer):
     class Meta:
@@ -14,9 +14,17 @@ class SensorDataSerializer(serializers.ModelSerializer):
         return value
 
 
-
 class CameraStateSerializer(serializers.ModelSerializer):
     class Meta:
         model = CameraState
         fields = ['is_on', 'updated_at']
         read_only_fields = ['updated_at']
+
+
+class WateringLogSerializer(serializers.ModelSerializer):
+    """Сериализатор для логов полива"""
+
+    class Meta:
+        model = WateringLog
+        fields = ['plant', 'duration', 'source', 'success', 'comment']
+        read_only_fields = ['started_at']

@@ -7,7 +7,7 @@ import cv2
 from django.http import StreamingHttpResponse, HttpResponse
 
 from .models import SensorData, DeviceState, CameraState
-from .serializers import SensorDataSerializer, CameraStateSerializer
+from .serializers import SensorDataSerializer, CameraStateSerializer, WateringLogSerializer
 
 def index(request):
     return render(request, 'index.html', {'title': 'Главная'})
@@ -118,3 +118,20 @@ class CameraStateAPIView(APIView):
             state.save()
 
         return Response({"ok": True, "is_on": state.is_on})
+
+
+class WateringLogAPIView(APIView):
+    """API для записи логов полива"""
+
+    def post(self, request):
+        serializer = WateringLogSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"ok": True, "log": serializer.data},
+                status=status.HTTP_201_CREATED
+            )
+        return Response(
+            {"error": serializer.errors},
+            status=status.HTTP_400_BAD_REQUEST
+        )

@@ -1,6 +1,6 @@
 from django.urls import path
 from plants.views import (SensorDataAPIView, index, DeviceStateAPIView, control, video_feed,
-                          CameraStateAPIView, video_feed)
+                          CameraStateAPIView, video_feed, WateringLogAPIView)
 
 app_name = 'plants'
 
@@ -12,4 +12,5 @@ urlpatterns = [
     path('video_feed/', video_feed, name='video_feed'),
     path('api/camera/', CameraStateAPIView.as_view(), name='camera_state'),
     path('video_feed/', video_feed, name='video_feed'),
+    path('api/watering-log/', WateringLogAPIView.as_view(), name='watering_log_api'),
 ]
