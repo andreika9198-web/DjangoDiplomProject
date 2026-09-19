@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4">⚙️ Состояние устройства</h2>
+
+<div class="row">
+    <!-- Режим -->
+    <div class="col-md-6 mb-3">
+        <div class="card-plant text-center 
+                    {% if state.automatic %}border-success{% else %}border-warning{% endif %}"
+             style="border-width: 3px !important;">
+            <h5 class="text-muted">🤖 Режим работы</h5>
+            {% if state.automatic %}
+                <h2 class="text-success">Автоматический</h2>
+                <span class="status-badge status-ok">🟢 Включён</span>
+            {% else %}
+                <h2 class="text-warning">Ручной</h2>
+                <span class="status-badge status-warn">🟡 Включён</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Насос -->
+    <div class="col-md-6 mb-3">
+        <div class="card-plant text-center">
+            <h5 class="text-muted">💧 Насос (полив)</h5>
+            {% if state.pump %}
+                <h2 class="text-primary">Включён</h2>
+                <span class="status-badge status-ok">🟢 Работает</span>
+            {% else %}
+                <h2 class="text-muted">Выключен</h2>
+                <span class="status-badge status-danger">🔴 Остановлен</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Свет -->
+    <div class="col-md-6 mb-3">
+        <div class="card-plant text-center">
+            <h5 class="text-muted">💡 Свет</h5>
+            {% if state.light %}
+                <h2 class="text-warning">Включён</h2>
+                <span class="status-badge status-warn">🟡 Горит</span>
+            {% else %}
+                <h2 class="text-muted">Выключен</h2>
+                <span class="status-badge status-danger">🔴 Не горит</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Камера -->
+    <div class="col-md-6 mb-3">
+        <div class="card-plant text-center">
+            <h5 class="text-muted">📹 Камера</h5>
+            {% if camera.is_on %}
+                <h2 class="text-success">Включена</h2>
+                <span class="status-badge status-ok">🟢 Работает</span>
+            {% else %}
+                <h2 class="text-muted">Выключена</h2>
+                <span class="status-badge status-danger">🔴 Отключена</span>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Последнее обновление -->
+<div class="row mt-3">
+    <div class="col-12">
+        <div class="card-plant text-center">
+            <p class="text-muted mb-0">
+                🕐 Последнее обновление: 
+                <strong>{{ state.updated_at|date:"d.m.Y H:i:s" }}</strong>
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Кнопки -->
+<div class="row mt-3">
+    <div class="col-12 text-center">
+        <a href="{% url 'plants:control' %}" class="btn btn-success btn-lg">
+            🎛 Управление
+        </a>
+        <a href="{% url 'analytics:index' %}" class="btn btn-outline-success btn-lg">
+            📊 Аналитика
+        </a>
+    </div>
+</div>
+{% endblock %}

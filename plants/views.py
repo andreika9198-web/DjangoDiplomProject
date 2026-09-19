@@ -154,3 +154,18 @@ def plants_list(request):
         'title': 'Все растения',
         'plants_data': plants_data,
     })
+
+
+def device_state_page(request):
+    """Страница состояния устройства"""
+    state = DeviceState.objects.order_by('-updated_at').first()
+    if state is None:
+        state = DeviceState.objects.create(automatic=True, pump=False, light=False, camera=False)
+
+    camera_state, _ = CameraState.objects.get_or_create(id=1)
+
+    return render(request, 'device_state.html', {
+        'title': 'Состояние устройства',
+        'state': state,
+        'camera': camera_state,
+    })
