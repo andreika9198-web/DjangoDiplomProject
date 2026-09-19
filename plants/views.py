@@ -1,5 +1,4 @@
-from django.shortcuts import render
-
+from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -8,18 +7,38 @@ from django.http import StreamingHttpResponse, HttpResponse
 
 from .models import SensorData, DeviceState, CameraState, Plant
 from .serializers import SensorDataSerializer, CameraStateSerializer, WateringLogSerializer
+from devices.models import Device
 
 def index(request):
     return render(request, 'index.html', {'title': 'Главная'})
 
+
 class SensorDataAPIView(APIView):
     def post(self, request):
-        serializer = SensorDataSerializer(data=request.data)
+        device_id = request.data.get('device')  # ESP32 присылает свой device_id
+
+        # Ищем устройство
+        try:
+            device = Device.objects.get(device_id=device_id, is_active=True)
+        except Device.DoesNotExist:
+            return Response({"error": f"Device {device_id} not found"}, status=404)
+
+        if not device.plant:
+            return Response({"error": "Device not linked to any plant"}, status=400)
+
+        # Обновляем время последнего сигнала
+        device.last_seen = timezone.now()
+        device.save(update_fields=['last_seen'])
+
+        # Сохраняем данные
+        data = request.data.copy()
+        data['plant'] = device.plant.id
+
+        serializer = SensorDataSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            # Возвращаем КРОШЕЧНЫЙ ответ (всего 15 байт)
-            return Response({"ok": True}, status=status.HTTP_201_CREATED)
-        return Response({"error": "invalid"}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"ok": True}, status=201)
+        return Response({"error": serializer.errors}, status=400)
 
 
 class DeviceStateAPIView(APIView):
@@ -120,21 +139,30 @@ class CameraStateAPIView(APIView):
         return Response({"ok": True, "is_on": state.is_on})
 
 
+
+
 class WateringLogAPIView(APIView):
     """API для записи логов полива"""
-
     def post(self, request):
-        serializer = WateringLogSerializer(data=request.data)
+        device_id = request.data.get('device')  # ← принимаем device
+
+        try:
+            device = Device.objects.get(device_id=device_id, is_active=True)
+        except Device.DoesNotExist:
+            return Response({"error": f"Device {device_id} not found"}, status=404)
+
+        if not device.plant:
+            return Response({"error": "Device not linked to plant"}, status=400)
+
+        # Подставляем plant_id из устройства
+        data = request.data.copy()
+        data['plant'] = device.plant.id
+
+        serializer = WateringLogSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            return Response(
-                {"ok": True, "log": serializer.data},
-                status=status.HTTP_201_CREATED
-            )
-        return Response(
-            {"error": serializer.errors},
-            status=status.HTTP_400_BAD_REQUEST
-        )
+            return Response({"ok": True}, status=201)
+        return Response({"error": serializer.errors}, status=400)
 
 
 def plants_list(request):
