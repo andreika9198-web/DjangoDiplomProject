@@ -157,3 +157,19 @@ footer a:hover {
     flex-wrap: wrap;
     gap: 30px;   /* ← увеличили с 20px до 30px */
 }
+
+/* Выравнивание содержимого кнопок */
+.btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-pump-on,
+.btn-pump-off,
+.btn-light-on,
+.btn-light-off {
+    min-width: auto !important;   /* убираем фиксированную ширину */
+    font-weight: 600;
+    padding: 0.6rem 1rem;
+}

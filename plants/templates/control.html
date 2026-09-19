@@ -4,118 +4,121 @@
 {% block content %}
 <h2 class="mb-4">🎛 Панель управления</h2>
 
-<!-- ===== ВИДЕО ===== -->
-<!-- ===== ВИДЕО ===== -->
-<div class="row mb-4">
-    <div class="col-md-8 mx-auto">
-        <div class="card-plant text-center">
+<div class="row g-4">
+
+    <!-- ===== ЛЕВАЯ КОЛОНКА: ВИДЕО ===== -->
+    <div class="col-12 col-lg-7">
+        <div class="card-plant text-center h-100">
             <h5>📹 Видеонаблюдение</h5>
             <div class="video-container mt-3">
                 {% if camera.is_on %}
                     <img src="{% url 'plants:video_feed' %}?t={% now 'U' %}"
                          alt="Поток с камеры"
                          class="img-fluid rounded"
-                         style="max-height: 400px; background: #000; width: 100%;">
+                         style="max-height: 500px; background: #000; width: 100%;">
                 {% else %}
                     <img src="{% static 'camera_off.png' %}"
                          alt="Камера выключена"
                          class="img-fluid rounded"
-                         style="max-height: 400px; width: 100%;">
+                         style="max-height: 500px; width: 100%;">
                 {% endif %}
             </div>
 
             <div class="mt-3">
                 {% if camera.is_on %}
                     <button class="btn btn-danger" onclick="setCamera(false)">
-                        ⏹ Отключить камеру
+                        ⏹ Камера ВЫКЛ
                     </button>
                 {% else %}
                     <button class="btn btn-success" onclick="setCamera(true)">
-                        📷 Включить камеру
+                        📷 Камера ВКЛ
                     </button>
                 {% endif %}
             </div>
 
-            <p class="text-muted mt-2 small">Поток с USB-камеры</p>
+            <p class="text-muted mt-2 small mb-0">Поток с ESP32-CAM или USB-камеры</p>
         </div>
     </div>
-</div>
 
-<!-- ===== РЕЖИМ РАБОТЫ ===== -->
-<div class="row">
-    <div class="col-md-10 mx-auto">
-        <div class="card-plant">
+    <!-- ===== ПРАВАЯ КОЛОНКА: УПРАВЛЕНИЕ ===== -->
+    <div class="col-12 col-lg-5">
+
+        <!-- Режим работы -->
+        <div class="card-plant text-center mb-3">
             <h5 class="mb-3">⚙️ Режим работы</h5>
 
             {% if state.automatic %}
-            <div class="alert alert-success">
-                🤖 Сейчас: <strong>Автоматический режим</strong>
+            <div class="alert alert-success mb-3">
+                🤖 Сейчас: <strong>Автоматический</strong>
             </div>
-            <button class="btn btn-secondary btn-lg" onclick="setState('automatic', false)">
-                ✋ Переключить на ручное
+            <button class="btn btn-secondary w-100" onclick="setState('automatic', false)">
+                ✋ На РУЧНОЕ
             </button>
             {% else %}
-            <div class="alert alert-warning">
-                ✋ Сейчас: <strong>Ручной режим</strong>
+            <div class="alert alert-warning mb-3">
+                ✋ Сейчас: <strong>Ручной</strong>
             </div>
-            <button class="btn btn-success btn-lg" onclick="setState('automatic', true)">
-                🤖 Переключить на автомат
+            <button class="btn btn-success w-100" onclick="setState('automatic', true)">
+                🤖 На АВТО
             </button>
             {% endif %}
         </div>
-    </div>
-</div>
 
-<!-- ===== РУЧНОЕ УПРАВЛЕНИЕ (только если НЕ автомат) ===== -->
-{% if not state.automatic %}
-<div class="row mt-3">
-    <div class="col-md-10 mx-auto">
-        <div class="card-plant">
+        <!-- Ручное управление -->
+        {% if not state.automatic %}
+        <div class="card-plant mb-3">
             <h5 class="mb-3">💧 Полив</h5>
-            <div class="btn-group-spacing mb-4">
-                <button class="btn btn-lg {% if state.pump %}btn-primary{% else %}btn-outline-primary{% endif %}"
-                        onclick="setState('pump', true)">
-                    💧 ВКЛ Полив
-                </button>
-                <button class="btn btn-lg {% if not state.pump %}btn-primary{% else %}btn-outline-primary{% endif %}"
-                        onclick="setState('pump', false)">
-                    🚱 ВЫКЛ Полив
-                </button>
+            <div class="row g-2 mb-4">
+                <div class="col-6">
+                    <button class="btn w-100 {% if state.pump %}btn-pump-on{% else %}btn-pump-off{% endif %}"
+                            onclick="setState('pump', true)">
+                        💧 ВКЛ
+                    </button>
+                </div>
+                <div class="col-6">
+                    <button class="btn w-100 {% if not state.pump %}btn-pump-on{% else %}btn-pump-off{% endif %}"
+                            onclick="setState('pump', false)">
+                        🚱 ВЫКЛ
+                    </button>
+                </div>
             </div>
 
             <h5 class="mb-3">💡 Свет</h5>
-            <div class="btn-group-spacing mb-4">
-                <button class="btn btn-lg {% if state.light %}btn-warning{% else %}btn-outline-warning{% endif %}"
-                        onclick="setState('light', true)">
-                    💡 ВКЛ Свет
-                </button>
-                <button class="btn btn-lg {% if not state.light %}btn-warning{% else %}btn-outline-warning{% endif %}"
-                        onclick="setState('light', false)">
-                    🌑 Откл Свет
-                </button>
+            <div class="row g-2">
+                <div class="col-6">
+                    <button class="btn w-100 {% if state.light %}btn-light-on{% else %}btn-light-off{% endif %}"
+                            onclick="setState('light', true)">
+                        💡 ВКЛ
+                    </button>
+                </div>
+                <div class="col-6">
+                    <button class="btn w-100 {% if not state.light %}btn-light-on{% else %}btn-light-off{% endif %}"
+                            onclick="setState('light', false)">
+                        🌑 ВЫКЛ
+                    </button>
+                </div>
             </div>
         </div>
-    </div>
-</div>
-{% endif %}
+        {% endif %}
 
-<!-- ===== СТАТУС ===== -->
-<div class="row mt-4">
-    <div class="col-md-10 mx-auto">
+        <!-- Статус -->
         <div class="card-plant">
             <h5>📊 Текущее состояние</h5>
             <div id="current-state" class="mt-3">
-                <p><strong>Автоматический режим:</strong> <span id="state-automatic">—</span></p>
+                <p><strong>Режим:</strong> <span id="state-automatic">—</span></p>
                 <p><strong>Полив:</strong> <span id="state-pump">—</span></p>
                 <p><strong>Свет:</strong> <span id="state-light">—</span></p>
-                <p><strong>Камера:</strong>
+                <p class="mb-0">
+                    <strong>Камера:</strong>
                     <span class="status-badge {% if camera.is_on %}status-ok{% else %}status-danger{% endif %}">
                         {% if camera.is_on %}✅ ВКЛ{% else %}❌ ВЫКЛ{% endif %}
                     </span>
-                <p>
+                </p>
             </div>
         </div>
+
     </div>
+
 </div>
 
 <script src="{% static 'js/control.js' %}"></script>
