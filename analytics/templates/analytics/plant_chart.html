@@ -50,35 +50,6 @@
     <div id="wateringChart"></div>
 </div>
 
-<!-- ===== ИСТОРИЯ ПОЛИВОВ ===== -->
-<div class="card-plant">
-    <h5 class="mb-3">💧 История поливов</h5>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Дата</th>
-                <th>Начало</th>
-                <th>Окончание</th>
-                <th>Длительность</th>
-                <th>Источник</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for log in logs %}
-            <tr>
-                <td>{{ log.started_at|date:"d.m.Y H:i" }}</td>
-                <td>{{ log.start_watering_time|default:"—" }}</td>
-                <td>{{ log.end_watering_time|default:"—" }}</td>
-                <td>{{ log.duration }} сек</td>
-                <td>{{ log.get_source_display }}</td>
-            </tr>
-            {% empty %}
-            <tr><td colspan="5">Поливов пока не было</td></tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-
 <!-- ===== APEXCHARTS + ANALYTICS JS ===== -->
 <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
 <script src="{% static 'js/analytics.js' %}"></script>

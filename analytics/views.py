@@ -101,3 +101,26 @@ def sensors_api(request):
             })
 
     return JsonResponse({'plants': data})
+
+
+def watering_history(request):
+    """Страница истории поливов"""
+    from plants.models import WateringLog, Plant
+
+    # Все логи (можно фильтровать по растению)
+    plant_id = request.GET.get('plant')
+    if plant_id:
+        logs = WateringLog.objects.filter(plant_id=plant_id).order_by('-started_at')
+        selected_plant = Plant.objects.filter(id=plant_id).first()
+    else:
+        logs = WateringLog.objects.all().order_by('-started_at')[:100]
+        selected_plant = None
+
+    plants = Plant.objects.filter(is_active=True)
+
+    return render(request, 'analytics/watering.html', {
+        'title': 'История поливов',
+        'logs': logs,
+        'plants': plants,
+        'selected_plant': selected_plant,
+    })

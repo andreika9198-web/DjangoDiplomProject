@@ -43,7 +43,7 @@
                            data-toggle="dropdown">📊 Датчики</a>
                         <ul class="dropdown-menu" aria-labelledby="sensorsDropdown">
                             <li><a class="dropdown-item" href="{% url 'analytics:sensors' %}">📈 Показания</a></li>
-                            <li><a class="dropdown-item" href="/admin/plants/wateringlog/">💧 История поливов</a></li>
+                            <li><a class="dropdown-item" href="{% url 'analytics:watering_history' %}">💧 История поливов</a></li>
                             <li class="nav-item">
                                 <a class="dropdown-item" href="{% url 'analytics:index' %}">📊 Аналитика</a>
                             </li>
