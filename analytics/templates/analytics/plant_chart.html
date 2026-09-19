@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<h2 class="mb-4">📈 {{ plant.name }}</h2>
+
+<!-- ===== КАРТОЧКИ СТАТИСТИКИ ===== -->
+<div class="row mb-4">
+    <div class="col-md-4 mb-3">
+        <div class="card-plant text-center">
+            <h6 class="text-muted">💧 Средняя влажность</h6>
+            <h2 class="text-primary">{{ stats.avg_h|floatformat:1|default:"—" }}%</h2>
+            <small class="text-muted">
+                Мин: {{ stats.min_h|floatformat:1|default:"—" }}% /
+                Макс: {{ stats.max_h|floatformat:1|default:"—" }}%
+            </small>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card-plant text-center">
+            <h6 class="text-muted">🌡 Средняя температура</h6>
+            <h2 class="text-danger">{{ stats.avg_t|floatformat:1|default:"—" }}°C</h2>
+            <small class="text-muted">
+                Мин: {{ stats.min_t|floatformat:1|default:"—" }}°C /
+                Макс: {{ stats.max_t|floatformat:1|default:"—" }}°C
+            </small>
+        </div>
+    </div>
+    <div class="col-md-4 mb-3">
+        <div class="card-plant text-center">
+            <h6 class="text-muted">💧 Всего поливов</h6>
+            <h2 class="text-success">{{ logs|length }}</h2>
+            <small class="text-muted">Последние 20 записей</small>
+        </div>
+    </div>
+</div>
+
+<!-- ===== ГРАФИК ВЛАЖНОСТИ ===== -->
+<div class="card-plant mb-4">
+    <div id="humidityChart"></div>
+</div>
+
+<!-- ===== ГРАФИК ТЕМПЕРАТУРЫ ===== -->
+<div class="card-plant mb-4">
+    <div id="temperatureChart"></div>
+</div>
+
+<!-- ===== ГРАФИК ПОЛИВОВ ПО ДНЯМ ===== -->
+<div class="card-plant mb-4">
+    <div id="wateringChart"></div>
+</div>
+
+<!-- ===== ИСТОРИЯ ПОЛИВОВ ===== -->
+<div class="card-plant">
+    <h5 class="mb-3">💧 История поливов</h5>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Дата</th>
+                <th>Начало</th>
+                <th>Окончание</th>
+                <th>Длительность</th>
+                <th>Источник</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for log in logs %}
+            <tr>
+                <td>{{ log.started_at|date:"d.m.Y H:i" }}</td>
+                <td>{{ log.start_watering_time|default:"—" }}</td>
+                <td>{{ log.end_watering_time|default:"—" }}</td>
+                <td>{{ log.duration }} сек</td>
+                <td>{{ log.get_source_display }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5">Поливов пока не было</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- ===== APEXCHARTS + ANALYTICS JS ===== -->
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script src="{% static 'js/analytics.js' %}"></script>
+<script>
+    renderHumidityChart({{ humidity|safe }}, {{ labels|safe }});
+    renderTemperatureChart({{ temperature|safe }}, {{ labels|safe }});
+    renderWateringChart({{ watering_counts|safe }}, {{ watering_dates|safe }});
+</script>
+{% endblock %}

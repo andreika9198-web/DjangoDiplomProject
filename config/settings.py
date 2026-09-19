@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     # project apps
     'rest_framework',
     'plants',
+    'analytics'
 ]
 
 MIDDLEWARE = [

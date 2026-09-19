@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2 class="mb-4">📊 Аналитика</h2>
+
+<div class="row">
+    {% for plant in plants %}
+    <div class="col-md-4 mb-3">
+        <div class="card-plant">
+            <h5>🌱 {{ plant.name }}</h5>
+            <p class="text-muted">
+                Порог влажности: {{ plant.min_humidity }}% — {{ plant.max_humidity }}%
+            </p>
+            <a href="{% url 'analytics:plant_chart' plant.id %}" class="btn btn-success">
+                📈 Открыть график
+            </a>
+        </div>
+    </div>
+    {% empty %}
+    <p>Нет активных растений.</p>
+    {% endfor %}
+</div>
+{% endblock %}
