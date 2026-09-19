@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 col-md-8 col-lg-6 mx-auto">
+        <div class="card-plant text-center">
+            <!-- Аватар -->
+            {% if object.avatar %}
+                <img src="{{ object.avatar.url }}" alt="Аватар"
+                     class="rounded-circle mb-3"
+                     style="width: 150px; height: 150px; object-fit: cover;">
+            {% else %}
+                <div class="rounded-circle bg-secondary d-inline-flex align-items-center justify-content-center mb-3"
+                     style="width: 150px; height: 150px;">
+                    <span style="font-size: 4rem;">👤</span>
+                </div>
+            {% endif %}
+
+            <!-- Имя -->
+            <h3>{{ object.first_name }} {{ object.last_name }}</h3>
+            <p class="text-muted">{{ object.email }}</p>
+
+            <!-- Роль -->
+            <span class="status-badge 
+                {% if object.role == 'admin' %}status-danger
+                {% elif object.role == 'moderator' %}status-warn
+                {% else %}status-ok{% endif %}">
+                {{ object.get_role_display }}
+            </span>
+
+            <hr class="my-4">
+
+            <!-- Данные -->
+            <table class="table table-sm text-start">
+                <tr>
+                    <th>📧 Email:</th>
+                    <td>{{ object.email }}</td>
+                </tr>
+                <tr>
+                    <th>👤 Имя:</th>
+                    <td>{{ object.first_name|default:"Не указано" }}</td>
+                </tr>
+                <tr>
+                    <th>👤 Фамилия:</th>
+                    <td>{{ object.last_name|default:"Не указано" }}</td>
+                </tr>
+                <tr>
+                    <th>📞 Телефон:</th>
+                    <td>{{ object.phone|default:"Не указано" }}</td>
+                </tr>
+                <tr>
+                    <th>💬 VK ID:</th>
+                    <td>{{ object.vk_id|default:"Не указано" }}</td>
+                </tr>
+                <tr>
+                    <th>✅ Статус:</th>
+                    <td>
+                        {% if object.is_active %}
+                            <span class="status-badge status-ok">Активен</span>
+                        {% else %}
+                            <span class="status-badge status-danger">Заблокирован</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <th>📅 Регистрация:</th>
+                    <td>{{ object.date_joined|date:"d.m.Y" }}</td>
+                </tr>
+                {% if object.last_login %}
+                <tr>
+                    <th>🕐 Последний вход:</th>
+                    <td>{{ object.last_login|date:"d.m.Y H:i" }}</td>
+                </tr>
+                {% endif %}
+            </table>
+
+            <!-- Кнопка назад -->
+            <a href="{% url 'users:users_list' %}" class="btn btn-outline-secondary mt-3 w-100">
+                ⬅ Все пользователи
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

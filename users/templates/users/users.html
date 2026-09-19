@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% load user_tags %}
+
+{% block content %}
+<h2 class="mb-4">👥 Все пользователи</h2>
+
+<div class="row">
+    {% for object in object_list %}
+        {% include 'users/includes/inc_user_card.html' with object=object %}
+    {% empty %}
+        <div class="col-12">
+            <div class="alert alert-warning text-center">
+                Пользователей пока нет
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+{% include 'users/includes/inc_pagination.html' %}
+{% endblock %}

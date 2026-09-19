@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>{{ title }} | Smart Watering</title>
 
-    <!-- Твои стили Bootstrap -->
     <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
     <link href="{% static 'css/album.css' %}" rel="stylesheet">
     <link href="{% static 'css/custom.css' %}" rel="stylesheet">
@@ -28,6 +27,7 @@
             <div class="collapse navbar-collapse" id="navbarMain">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
 
+                    <!-- Растения -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="plantsDropdown" role="button"
                            data-toggle="dropdown">🌿 Растения</a>
@@ -38,18 +38,18 @@
                         </ul>
                     </li>
 
+                    <!-- Датчики -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="sensorsDropdown" role="button"
                            data-toggle="dropdown">📊 Датчики</a>
                         <ul class="dropdown-menu" aria-labelledby="sensorsDropdown">
                             <li><a class="dropdown-item" href="{% url 'analytics:sensors' %}">📈 Показания</a></li>
                             <li><a class="dropdown-item" href="{% url 'analytics:watering_history' %}">💧 История поливов</a></li>
-                            <li class="nav-item">
-                                <a class="dropdown-item" href="{% url 'analytics:index' %}">📊 Аналитика</a>
-                            </li>
+                            <li><a class="dropdown-item" href="{% url 'analytics:index' %}">📊 Аналитика</a></li>
                         </ul>
                     </li>
 
+                    <!-- Управление -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="controlDropdown" role="button"
                            data-toggle="dropdown">⚙️ Управление</a>
@@ -61,16 +61,24 @@
 
                 </ul>
 
+                <!-- ===== МЕНЮ ПОЛЬЗОВАТЕЛЯ ===== -->
                 <ul class="navbar-nav">
                     {% if user.is_authenticated %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-                               data-toggle="dropdown">👤 {{ user.username }}</a>
+                               data-toggle="dropdown">
+                                👤 {{ user.first_name|default:user.email }}
+                            </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                                <li><a class="dropdown-item" href="/admin/">👤 Профиль</a></li>
+                                <li><a class="dropdown-item" href="{% url 'users:user_profile' %}">👤 Мой профиль</a></li>
+                                <li><a class="dropdown-item" href="{% url 'users:user_update' %}">📝 Редактировать</a></li>
+                                <li><a class="dropdown-item" href="{% url 'users:user_password_change' %}">🔑 Сменить пароль</a></li>
+                                {% if user.role == 'admin' %}
+                                <li><a class="dropdown-item" href="{% url 'users:users_list' %}">👥 Все пользователи</a></li>
+                                {% endif %}
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <form method="post" action="{% url 'admin:logout' %}" class="px-3">
+                                    <form method="post" action="{% url 'users:user_logout' %}" class="px-3">
                                         {% csrf_token %}
                                         <button type="submit" class="btn btn-danger btn-sm w-100">🚪 Выход</button>
                                     </form>
@@ -78,7 +86,12 @@
                             </ul>
                         </li>
                     {% else %}
-                        <li class="nav-item"><a class="nav-link" href="/admin/login/">🔑 Вход</a></li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'users:user_login' %}">🔑 Вход</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'users:user_register' %}">📝 Регистрация</a>
+                        </li>
                     {% endif %}
                 </ul>
             </div>

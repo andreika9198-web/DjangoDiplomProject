@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 col-md-8 col-lg-6 mx-auto">
+        <div class="card-plant">
+            <h3 class="text-center mb-4">👤 Мой профиль</h3>
+
+            <!-- Аватар -->
+            <div class="text-center mb-4">
+                {% if user.avatar %}
+                    <img src="{{ user.avatar.url }}" alt="Аватар"
+                         class="rounded-circle"
+                         style="width: 150px; height: 150px; object-fit: cover;">
+                {% else %}
+                    <div class="rounded-circle bg-secondary d-inline-flex align-items-center justify-content-center"
+                         style="width: 150px; height: 150px;">
+                        <span style="font-size: 4rem;">👤</span>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Имя -->
+            <div class="text-center mb-4">
+                <h4>{{ user.first_name }} {{ user.last_name }}</h4>
+                <p class="text-muted">{{ user.email }}</p>
+
+                <span class="status-badge 
+                    {% if user.role == 'admin' %}status-danger
+                    {% elif user.role == 'moderator' %}status-warn
+                    {% else %}status-ok{% endif %}">
+                    {{ user.get_role_display }}
+                </span>
+            </div>
+
+            <hr class="my-4">
+
+            <!-- Данные -->
+            <table class="table">
+                <tr>
+                    <th>📧 Email:</th>
+                    <td>{{ user.email }}</td>
+                </tr>
+                <tr>
+                    <th>👤 Имя:</th>
+                    <td>{{ user.first_name|default:"Не указано" }}</td>
+                </tr>
+                <tr>
+                    <th>👤 Фамилия:</th>
+                    <td>{{ user.last_name|default:"Не указано" }}</td>
+                </tr>
+                <tr>
+                    <th>📞 Телефон:</th>
+                    <td>{{ user.phone|default:"Не указано" }}</td>
+                </tr>
+                <tr>
+                    <th>💬 VK ID:</th>
+                    <td>{{ user.vk_id|default:"Не указано" }}</td>
+                </tr>
+            </table>
+
+            <!-- Кнопки -->
+            <div class="d-flex flex-column gap-2 mt-3">
+                <a href="{% url 'users:user_update' %}" class="btn btn-success">
+                    📝 Редактировать профиль
+                </a>
+                <a href="{% url 'users:user_password_change' %}" class="btn btn-outline-secondary">
+                    🔑 Сменить пароль
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
