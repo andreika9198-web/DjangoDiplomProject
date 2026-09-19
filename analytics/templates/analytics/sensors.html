@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<h2 class="mb-4">📡 Показания датчиков</h2>
+
+<div id="sensors-container">
+    {% for item in plants_data %}
+        <h3 class="mb-3 mt-4">🌱 {{ item.plant.name }}</h3>
+
+        {% if item.latest %}
+        <div class="row mb-4" data-plant-id="{{ item.plant.id }}">
+            <div class="col-md-6 mb-3">
+                <div class="card-plant text-center">
+                    <h6 class="text-muted">💧 Текущая влажность</h6>
+                    <h2 class="humidity-value
+                        {% if item.latest.humidity < 30 %}text-danger
+                        {% elif item.latest.humidity > 70 %}text-primary
+                        {% else %}text-success{% endif %}">
+                        {{ item.latest.humidity|floatformat:1 }}%
+                    </h2>
+                    <small class="text-muted">
+                        Порог: {{ item.plant.min_humidity }}% — {{ item.plant.max_humidity }}%
+                    </small>
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <div class="card-plant text-center">
+                    <h6 class="text-muted">🌡 Текущая температура</h6>
+                    <h2 class="text-danger temperature-value">
+                        {{ item.latest.temperature|floatformat:1|default:"—" }}°C
+                    </h2>
+                    <small class="text-muted updated-at">
+                        Обновлено: {{ item.latest.created_at|date:"H:i:s" }}
+                    </small>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    {% endfor %}
+</div>
+
+<script src="{% static 'js/sensors.js' %}"></script>
+{% endblock %}

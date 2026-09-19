@@ -3,6 +3,7 @@ from django.db.models import Count, Avg, Max, Min
 from django.db.models.functions import TruncDate
 from plants.models import Plant, SensorData, WateringLog
 import json
+from django.http import JsonResponse
 
 
 def analytics_index(request):
@@ -61,3 +62,42 @@ def plant_chart(request, plant_id):
         'watering_dates': json.dumps(watering_dates),
         'watering_counts': json.dumps(watering_counts),
     })
+
+
+def sensors_page(request):
+    """Страница с текущими показаниями датчиков"""
+    from plants.models import Plant, SensorData
+
+    plants = Plant.objects.filter(is_active=True)
+
+    plants_data = []
+    for plant in plants:
+        latest = SensorData.objects.filter(plant=plant).order_by('-created_at').first()
+        plants_data.append({
+            'plant': plant,
+            'latest': latest,
+        })
+
+    return render(request, 'analytics/sensors.html', {
+        'title': 'Показания датчиков',
+        'plants_data': plants_data,
+    })
+
+
+def sensors_api(request):
+    """API для текущих показаний датчиков (JSON)"""
+    plants = Plant.objects.filter(is_active=True)
+
+    data = []
+    for plant in plants:
+        latest = SensorData.objects.filter(plant=plant).order_by('-created_at').first()
+        if latest:
+            data.append({
+                'plant_id': plant.id,
+                'plant_name': plant.name,
+                'humidity': latest.humidity,
+                'temperature': latest.temperature,
+                'created_at': latest.created_at.strftime('%H:%M:%S'),
+            })
+
+    return JsonResponse({'plants': data})
