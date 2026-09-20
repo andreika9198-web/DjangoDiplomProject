@@ -1,9 +1,16 @@
 from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+
+from django.contrib.auth.mixins import LoginRequiredMixin
 import cv2
 from django.http import StreamingHttpResponse, HttpResponse
+from django.views.generic import UpdateView, ListView
+from django.urls import reverse_lazy
+from django.contrib.auth.decorators import login_required
+from django.core.exceptions import PermissionDenied
+from django.shortcuts import render, redirect, get_object_or_404
+from .forms import PlantForm
 
 from .models import SensorData, DeviceState, CameraState, Plant
 from .serializers import SensorDataSerializer, CameraStateSerializer, WateringLogSerializer
@@ -165,23 +172,42 @@ class WateringLogAPIView(APIView):
         return Response({"error": serializer.errors}, status=400)
 
 
-def plants_list(request):
-    """Страница со всеми растениями"""
-    plants = Plant.objects.filter(is_active=True)
+# plants/views.py
+class PlantListView(LoginRequiredMixin, ListView):
+    """
+    Список растений с последними показаниями датчиков.
+    - Обычный пользователь видит только свои растения.
+    - Администратор и модератор видят все растения.
+    """
+    model = Plant
+    template_name = 'plants_list.html'
+    context_object_name = 'plants_data'  # 👈 возвращаем имя как в шаблоне
+    paginate_by = 6
 
-    # Добавляем последние данные для каждого растения
-    plants_data = []
-    for plant in plants:
-        latest = SensorData.objects.filter(plant=plant).order_by('-created_at').first()
-        plants_data.append({
-            'plant': plant,
-            'latest': latest,
-        })
+    def get_queryset(self):
+        queryset = super().get_queryset()
 
-    return render(request, 'plants_list.html', {
-        'title': 'Все растения',
-        'plants_data': plants_data,
-    })
+        # Админ и модератор видят все растения
+        if self.request.user.role in ('admin', 'moderator'):
+            return queryset
+
+        # Обычный пользователь видит только свои
+        return queryset.filter(owner=self.request.user)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        # Формируем plants_data с последними показаниями
+        plants_data = []
+        for plant in context['plants_data']:
+            latest = SensorData.objects.filter(plant=plant).order_by('-created_at').first()
+            plants_data.append({
+                'plant': plant,
+                'latest': latest,
+            })
+
+        context['plants_data'] = plants_data
+        return context
 
 
 def device_state_page(request):
@@ -221,28 +247,31 @@ def plant_add(request):
     })
 
 
-from django.shortcuts import render, redirect, get_object_or_404
-from .forms import PlantForm
-from .models import Plant, SensorData
+class PlantUpdateView(LoginRequiredMixin, UpdateView):
+    """
+    Редактирование растения.
+    - Доступно только владельцу или администратору/модератору.
+    """
+    model = Plant
+    form_class = PlantForm
+    template_name = 'plant_edit.html'
+    success_url = reverse_lazy('plants:plants_list')
+    pk_url_kwarg = 'plant_id'
 
+    def get_object(self, queryset=None):
+        plant = super().get_object(queryset)
 
-def plant_edit(request, plant_id):
-    """Редактирование растения"""
-    plant = get_object_or_404(Plant, id=plant_id)
+        # Проверяем права доступа
+        if plant.owner != self.request.user and self.request.user.role not in ('admin', 'moderator'):
+            raise PermissionDenied("Вы не можете редактировать это растение")
 
-    if request.method == 'POST':
-        form = PlantForm(request.POST, instance=plant)
-        if form.is_valid():
-            form.save()
-            return redirect('plants:plants_list')
-    else:
-        form = PlantForm(instance=plant)
+        return plant
 
-    return render(request, 'plant_edit.html', {
-        'title': f'Редактировать: {plant.name}',
-        'form': form,
-        'plant': plant,
-    })
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        plant = self.get_object()
+        context_data['title'] = f'Редактировать: {plant.name}'
+        return context_data
 
 
 def plant_delete(request, plant_id):

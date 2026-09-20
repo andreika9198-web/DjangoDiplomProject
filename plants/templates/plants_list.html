@@ -14,7 +14,7 @@
                 {{ item.plant.min_humidity }}% — {{ item.plant.max_humidity }}%
             </p>
             <p class="mb-1">
-                <strong>Владелец:</strong> {{ item.plant.owner.username }}
+                <strong>Владелец:</strong> {{  item.plant.owner.email|default:"Не указан" }}
             </p>
             <p class="mb-3">
                 <strong>Статус:</strong>
@@ -39,7 +39,7 @@
                 <a href="{% url 'analytics:plant_chart' item.plant.id %}" class="btn btn-success btn-sm">
                 📈 График
                 </a>
-                <a href="{% url 'plants:plant_edit' item.plant.id %}" class="btn btn-outline-primary btn-sm">
+                <a href="{% url 'plants:plant_id' item.plant.id %}" class="btn btn-outline-primary btn-sm">
                     📝 Редактировать
                 </a>
                 <a href="{% url 'plants:plant_delete' item.plant.id %}" class="btn btn-outline-danger btn-sm">
