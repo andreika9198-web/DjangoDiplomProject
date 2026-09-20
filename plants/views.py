@@ -2,10 +2,10 @@ from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 import cv2
 from django.http import StreamingHttpResponse, HttpResponse
-from django.views.generic import UpdateView, ListView
+from django.views.generic import UpdateView, ListView, CreateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -229,22 +229,26 @@ from django.shortcuts import render, redirect
 from .forms import PlantForm
 
 
-def plant_add(request):
-    """Страница добавления растения"""
-    if request.method == 'POST':
-        form = PlantForm(request.POST)
-        if form.is_valid():
-            plant = form.save(commit=False)
-            plant.owner = request.user  # ← назначаем владельца
-            plant.save()
-            return redirect('plants:plants_list')
-    else:
-        form = PlantForm()
+class PlantCreateView(LoginRequiredMixin, CreateView):
+    """
+    Создание растения.
+    - Доступно только авторизованным пользователям.
+    - Владелец назначается автоматически (текущий пользователь).
+    """
+    model = Plant
+    form_class = PlantForm
+    template_name = 'plant_add.html'
+    success_url = reverse_lazy('plants:plants_list')
 
-    return render(request, 'plant_add.html', {
-        'title': 'Добавить растение',
-        'form': form,
-    })
+    def form_valid(self, form):
+        # Назначаем владельца — текущего пользователя
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        context_data['title'] = 'Добавить растение'
+        return context_data
 
 
 class PlantUpdateView(LoginRequiredMixin, UpdateView):
@@ -274,15 +278,26 @@ class PlantUpdateView(LoginRequiredMixin, UpdateView):
         return context_data
 
 
-def plant_delete(request, plant_id):
-    """Удаление растения"""
-    plant = get_object_or_404(Plant, id=plant_id)
+class PlantDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    """
+    Удаление растения.
+    - Доступно только администратору и модератору.
+    """
+    model = Plant
+    template_name = 'plant_delete.html'
+    success_url = reverse_lazy('plants:plants_list')
+    pk_url_kwarg = 'plant_id'
 
-    if request.method == 'POST':
-        plant.delete()
-        return redirect('plants:plants_list')
+    def test_func(self):
+        # Разрешаем удаление только админу и модератору
+        return self.request.user.role in ('admin', 'moderator')
 
-    return render(request, 'plant_delete.html', {
-        'title': f'Удалить: {plant.name}',
-        'plant': plant,
-    })
+    def handle_no_permission(self):
+        # Если нет прав — показываем 403
+        raise PermissionDenied("У вас нет прав для удаления растения")
+
+    def get_context_data(self, **kwargs):
+        context_data = super().get_context_data(**kwargs)
+        plant = self.get_object()
+        context_data['title'] = f'Удалить: {plant.name}'
+        return context_data

@@ -1,7 +1,7 @@
 from django.urls import path
 from plants.views import (SensorDataAPIView, index, DeviceStateAPIView, control, video_feed,
                           CameraStateAPIView, video_feed, WateringLogAPIView, PlantListView,
-                          device_state_page, plant_add, PlantUpdateView,  plant_delete)
+                          device_state_page, PlantCreateView, PlantUpdateView,  PlantDeleteView)
 
 app_name = 'plants'
 
@@ -16,7 +16,7 @@ urlpatterns = [
     path('api/watering-log/', WateringLogAPIView.as_view(), name='watering_log_api'),
     path('plants/', PlantListView.as_view(), name='plants_list'),
     path('control/state/', device_state_page, name='device_state_page'),
-    path('plants/add/', plant_add, name='plant_add'),
+    path('plants/add/', PlantCreateView.as_view(), name='plant_add'),
     path('plants/<int:plant_id>/edit/', PlantUpdateView.as_view(), name='plant_id'),
-    path('plants/<int:plant_id>/delete/', plant_delete, name='plant_delete'),
+    path('plants/<int:plant_id>/delete/', PlantDeleteView.as_view(), name='plant_delete'),
 ]
