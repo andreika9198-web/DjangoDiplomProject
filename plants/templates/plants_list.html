@@ -42,9 +42,11 @@
                 <a href="{% url 'plants:plant_id' item.plant.id %}" class="btn btn-outline-primary btn-sm">
                     📝 Редактировать
                 </a>
+                {% if user.role == 'admin' or user.role == 'moderator' %}
                 <a href="{% url 'plants:plant_delete' item.plant.id %}" class="btn btn-outline-danger btn-sm">
                     🗑 Удалить
                 </a>
+                {% endif %}
             </div>
         </div>
     </div>

@@ -34,7 +34,9 @@
                         <ul class="dropdown-menu" aria-labelledby="plantsDropdown">
                             <li><a class="dropdown-item" href="{% url 'plants:control' %}">🎛 Контроль параметров</a></li>
                             <li><a class="dropdown-item" href="{% url 'plants:plants_list' %}">📋 Все растения</a></li>
+                            {% if user.role == 'admin' or user.role == 'moderator' %}
                             <li><a class="dropdown-item" href="{% url 'plants:plant_add' %}">➕ Добавить растение</a></li>
+                            {% endif %}
                         </ul>
                     </li>
 
@@ -55,7 +57,9 @@
                            data-toggle="dropdown">⚙️ Управление</a>
                         <ul class="dropdown-menu" aria-labelledby="controlDropdown">
                             <li><a class="dropdown-item" href="{% url 'plants:device_state_page' %}">🔧 Состояние устройства</a></li>
+                             {% if user.role == 'admin' or user.role == 'moderator' %}
                             <li><a class="dropdown-item" href="/admin/">🛠 Админка</a></li>
+                            {% endif %}
                         </ul>
                     </li>
 

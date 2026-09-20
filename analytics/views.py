@@ -8,8 +8,15 @@ import zoneinfo
 
 
 def analytics_index(request):
-    """Главная страница аналитики — список растений"""
-    plants = Plant.objects.filter(is_active=True)
+    """Главная страница аналитики"""
+
+    # Админ и модератор видят все растения
+    if request.user.is_authenticated and request.user.role in ('admin', 'moderator'):
+        plants = Plant.objects.filter(is_active=True)
+    else:
+        # Обычный пользователь — только свои
+        plants = Plant.objects.filter(is_active=True, owner=request.user)
+
     return render(request, 'analytics/index.html', {
         'title': 'Аналитика',
         'plants': plants,
@@ -67,9 +74,12 @@ def plant_chart(request, plant_id):
 
 def sensors_page(request):
     """Страница с текущими показаниями датчиков"""
-    from plants.models import Plant, SensorData
 
-    plants = Plant.objects.filter(is_active=True)
+    # ===== РАЗГРАНИЧЕНИЕ ПРАВ =====
+    if request.user.is_authenticated and request.user.role in ('admin', 'moderator'):
+        plants = Plant.objects.filter(is_active=True)  # админ — все
+    else:
+        plants = Plant.objects.filter(is_active=True, owner=request.user)  # юзер — свои
 
     plants_data = []
     for plant in plants:
@@ -105,19 +115,30 @@ def sensors_api(request):
 
 
 def watering_history(request):
-    """Страница истории поливов"""
-    from plants.models import WateringLog, Plant
+    """История поливов"""
 
-    # Все логи (можно фильтровать по растению)
-    plant_id = request.GET.get('plant')
-    if plant_id:
-        logs = WateringLog.objects.filter(plant_id=plant_id).order_by('-started_at')
-        selected_plant = Plant.objects.filter(id=plant_id).first()
-    else:
+    # ===== РАЗГРАНИЧЕНИЕ ПРАВ =====
+    if request.user.is_authenticated and request.user.role in ('admin', 'moderator'):
+        plants = Plant.objects.filter(is_active=True)
         logs = WateringLog.objects.all().order_by('-started_at')[:100]
-        selected_plant = None
+    else:
+        plants = Plant.objects.filter(is_active=True, owner=request.user)
+        logs = WateringLog.objects.filter(plant__owner=request.user).order_by('-started_at')[:100]
 
-    plants = Plant.objects.filter(is_active=True)
+    # ===== ФИЛЬТР ПО РАСТЕНИЮ (если выбран) =====
+    plant_id = request.GET.get('plant')
+    selected_plant = None
+
+    if plant_id:
+        if request.user.role in ('admin', 'moderator'):
+            selected_plant = Plant.objects.filter(id=plant_id).first()
+        else:
+            selected_plant = Plant.objects.filter(id=plant_id, owner=request.user).first()
+
+        if selected_plant:
+            logs = WateringLog.objects.filter(plant=selected_plant).order_by('-started_at')[:100]
+        else:
+            logs = WateringLog.objects.none()
 
     return render(request, 'analytics/watering.html', {
         'title': 'История поливов',
