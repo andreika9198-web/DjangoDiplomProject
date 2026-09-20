@@ -4,6 +4,7 @@ from django.db.models.functions import TruncDate
 from plants.models import Plant, SensorData, WateringLog
 import json
 from django.http import JsonResponse
+import zoneinfo
 
 
 def analytics_index(request):
@@ -20,13 +21,13 @@ def plant_chart(request, plant_id):
     plant = get_object_or_404(Plant, id=plant_id)
 
     # Последние 100 записей датчиков
-    data = SensorData.objects.filter(plant=plant).order_by('created_at')[:100]
-
+    data = SensorData.objects.filter(plant=plant).order_by('-created_at')[:500]
+    data = list(reversed(data))
     # Данные для графиков
-    labels = [d.created_at.strftime('%d.%m %H:%M') for d in data]
+    msk = zoneinfo.ZoneInfo('Europe/Moscow')
+    labels = [d.created_at.astimezone(msk).strftime('%d.%m %H:%M') for d in data]
     humidity = [d.humidity for d in data]
     temperature = [d.temperature if d.temperature else 0 for d in data]
-
     # Статистика
     stats = SensorData.objects.filter(plant=plant).aggregate(
         avg_h=Avg('humidity'),

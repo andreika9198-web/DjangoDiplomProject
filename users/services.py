@@ -5,8 +5,8 @@ from django.core.mail import send_mail
 def send_register_email(email):
     """Приветственное письмо"""
     send_mail(
-        subject='Добро пожаловать в Smart Watering',
-        message='Вы успешно зарегистрировались в системе Smart Watering!',
+        subject='Добро пожаловать в Умный полив',
+        message='Вы успешно зарегистрировались в системе Умный полив!',
         from_email=settings.EMAIL_HOST_USER,
         recipient_list=[email]
     )

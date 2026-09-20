@@ -6,5 +6,6 @@ Pillow
 djangorestframework
 django-cors-headers
 opencv-python
+requests
 flake8
 autopep8

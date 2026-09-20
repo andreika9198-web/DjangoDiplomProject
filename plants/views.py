@@ -7,6 +7,9 @@ import cv2
 from django.http import StreamingHttpResponse, HttpResponse
 from django.views.generic import UpdateView, ListView, CreateView, DeleteView
 from django.urls import reverse_lazy
+from .vk_service import vk_send_message
+import ctypes
+from pygrabber.dshow_graph import FilterGraph
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.shortcuts import render, redirect, get_object_or_404
@@ -22,7 +25,7 @@ def index(request):
 
 class SensorDataAPIView(APIView):
     def post(self, request):
-        device_id = request.data.get('device')  # ESP32 присылает свой device_id
+        device_id = request.data.get('device')
 
         # Ищем устройство
         try:
@@ -43,9 +46,112 @@ class SensorDataAPIView(APIView):
 
         serializer = SensorDataSerializer(data=data)
         if serializer.is_valid():
-            serializer.save()
+            sensor_data = serializer.save()
+
+            # ===== ПРОВЕРКА КРИТИЧЕСКИХ ЗНАЧЕНИЙ =====
+            plant = device.plant
+            humidity = sensor_data.humidity
+            temperature = sensor_data.temperature
+
+            vk_id = plant.owner.vk_id if plant.owner else None
+
+            if vk_id:
+                # 1. Влажность ниже минимальной
+                if humidity < plant.min_humidity:
+                    message = (
+                        f"💧 ВНИМАНИЕ! Растение '{plant.name}'\n"
+                        f"Влажность: {humidity}% (ниже порога {plant.min_humidity}%)\n"
+                        f"Срочно нужен полив!"
+                    )
+                    vk_send_message(vk_id, message)
+
+                # 2. Температура выше 30°C
+                if temperature and temperature > 30:
+                    message = (
+                        f"🔥 ВНИМАНИЕ! Растение '{plant.name}'\n"
+                        f"Температура: {temperature}°C (выше 30°C)\n"
+                        f"Проверьте условия!"
+                    )
+                    vk_send_message(vk_id, message)
+
             return Response({"ok": True}, status=201)
+
         return Response({"error": serializer.errors}, status=400)
+
+# Отправка уведомлении каждые 30 минут, что-бы не было спама
+# from datetime import timedelta
+# from django.utils import timezone
+#
+#
+# class SensorDataAPIView(APIView):
+#     def post(self, request):
+#         device_id = request.data.get('device')
+#
+#         try:
+#             device = Device.objects.get(device_id=device_id, is_active=True)
+#         except Device.DoesNotExist:
+#             return Response({"error": f"Device {device_id} not found"}, status=404)
+#
+#         if not device.plant:
+#             return Response({"error": "Device not linked to any plant"}, status=400)
+#
+#         device.last_seen = timezone.now()
+#         device.save(update_fields=['last_seen'])
+#
+#         data = request.data.copy()
+#         data['plant'] = device.plant.id
+#
+#         serializer = SensorDataSerializer(data=data)
+#         if serializer.is_valid():
+#             sensor_data = serializer.save()
+#
+#             plant = device.plant
+#             humidity = sensor_data.humidity
+#             temperature = sensor_data.temperature
+#             vk_id = plant.owner.vk_id if plant.owner else None
+#
+#             if vk_id:
+#                 # ===== ПРОВЕРКА НА СПАМ (30 минут) =====
+#                 now = timezone.now()
+#                 spam_window = now - timedelta(minutes=30)
+#
+#                 # Последние критические уведомления
+#                 recent_alerts = SensorData.objects.filter(
+#                     plant=plant,
+#                     created_at__gte=spam_window,
+#                 ).exclude(id=sensor_data.id)
+#
+#                 # Проверяем, было ли уже уведомление о влажности
+#                 humidity_alert_sent = any(
+#                     d.humidity < plant.min_humidity for d in recent_alerts
+#                 )
+#
+#                 # Проверяем, было ли уже уведомление о температуре
+#                 temp_alert_sent = any(
+#                     d.temperature and d.temperature > 30 for d in recent_alerts
+#                 )
+#
+#                 # 1. Влажность ниже минимальной
+#                 if humidity < plant.min_humidity and not humidity_alert_sent:
+#                     message = (
+#                         f"💧 ВНИМАНИЕ! Растение '{plant.name}'\n"
+#                         f"Влажность: {humidity}% (ниже порога {plant.min_humidity}%)\n"
+#                         f"Срочно нужен полив!"
+#                     )
+#                     vk_send_message(vk_id, message)
+#
+#                 # 2. Температура выше 30°C
+#                 if temperature and temperature > 30 and not temp_alert_sent:
+#                     message = (
+#                         f"🔥 ВНИМАНИЕ! Растение '{plant.name}'\n"
+#                         f"Температура: {temperature}°C (выше 30°C)\n"
+#                         f"Проверьте условия!"
+#                     )
+#                     vk_send_message(vk_id, message)
+#
+#             return Response({"ok": True}, status=201)
+#
+#         return Response({"error": serializer.errors}, status=400)
 
 
 class DeviceStateAPIView(APIView):
@@ -95,9 +201,26 @@ def control(request):
         'camera': camera_state,
     })
 
+
+
+def get_camera_index(name="USB 2.0 Camera"):
+    """Возвращает индекс камеры по имени"""
+    ctypes.windll.ole32.CoInitialize(None)
+    graph = FilterGraph()
+    devices = graph.get_input_devices()
+    ctypes.windll.ole32.CoUninitialize()
+
+    if name in devices:
+        return devices.index(name)
+    return 0
+
 def gen_frames():
     """Генератор кадров с камеры"""
-    camera = cv2.VideoCapture(1)  # 0 — первая USB-камера
+    camera_index = get_camera_index("USB 2.0 Camera")
+    print(f"DEBUG: camera_index = {camera_index}")
+
+    camera = cv2.VideoCapture(camera_index, cv2.CAP_DSHOW)
+
     if not camera.isOpened():
         print("Не удалось открыть камеру")
         return
@@ -106,12 +229,10 @@ def gen_frames():
         success, frame = camera.read()
         if not success:
             break
-        else:
-            # Кодируем кадр в JPEG
-            ret, buffer = cv2.imencode('.jpg', frame)
-            frame = buffer.tobytes()
-            yield (b'--frame\r\n'
-                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        ret, buffer = cv2.imencode('.jpg', frame)
+        frame = buffer.tobytes()
+        yield (b'--frame\r\n'
+               b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
 
 def video_feed(request):
@@ -181,7 +302,7 @@ class PlantListView(LoginRequiredMixin, ListView):
     """
     model = Plant
     template_name = 'plants_list.html'
-    context_object_name = 'plants_data'  # 👈 возвращаем имя как в шаблоне
+    context_object_name = 'plants_data'
     paginate_by = 6
 
     def get_queryset(self):
@@ -195,9 +316,9 @@ class PlantListView(LoginRequiredMixin, ListView):
         return queryset.filter(owner=self.request.user)
 
     def get_context_data(self, **kwargs):
+        """Добавляем последние показания датчиков для каждого растения"""
         context = super().get_context_data(**kwargs)
 
-        # Формируем plants_data с последними показаниями
         plants_data = []
         for plant in context['plants_data']:
             latest = SensorData.objects.filter(plant=plant).order_by('-created_at').first()
@@ -208,7 +329,6 @@ class PlantListView(LoginRequiredMixin, ListView):
 
         context['plants_data'] = plants_data
         return context
-
 
 def device_state_page(request):
     """Страница состояния устройства"""
