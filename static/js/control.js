@@ -4,13 +4,26 @@
 
 // ===== Отправка команды состояния =====
 function setState(field, value) {
+    let data = {};
+
+    // Если переключение режима — сбросить pump и light
+    if (field === 'automatic') {
+        data = {
+            automatic: value,
+            pump: false,
+            light: false
+        };
+    } else {
+        data = { [field]: value };
+    }
+
     fetch('/api/state/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'X-CSRFToken': getCookie('csrftoken')
         },
-        body: JSON.stringify({ [field]: value })
+        body: JSON.stringify(data)
     })
     .then(response => response.json())
     .then(data => {

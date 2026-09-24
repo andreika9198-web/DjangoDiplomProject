@@ -156,7 +156,7 @@ class SensorDataAPIView(APIView):
 
 class DeviceStateAPIView(APIView):
     def get(self, request):
-        # Берём самую свежую запись (любой ID)
+        # Берём самую свежую запись
         state = DeviceState.objects.order_by('-updated_at').first()
 
         # Если записей нет — создаём
@@ -175,11 +175,24 @@ class DeviceStateAPIView(APIView):
         """Обновление состояния через кнопки"""
         state = DeviceState.objects.order_by('-updated_at').first()
         if state is None:
-            state = DeviceState.objects.create(automatic=True, pump=False, light=False)
+            state = DeviceState.objects.create(
+                automatic=True, pump=False, light=False
+            )
 
-        # Обновляем переданные поля
+        # ===== ОБРАБОТКА ПЕРЕКЛЮЧЕНИЯ РЕЖИМА =====
         if 'automatic' in request.data:
-            state.automatic = request.data['automatic']
+            new_automatic = request.data['automatic']
+
+            # Если режим изменился — сбросить pump и light
+            if new_automatic != state.automatic:
+                state.pump = False
+                state.light = False
+                print(f"Mode switched: {state.automatic} → {new_automatic}")
+                print("Reset pump=False, light=False")
+
+            state.automatic = new_automatic
+
+        # ===== ОБНОВЛЕНИЕ ОСТАЛЬНЫХ ПОЛЕЙ =====
         if 'pump' in request.data:
             state.pump = request.data['pump']
         if 'light' in request.data:

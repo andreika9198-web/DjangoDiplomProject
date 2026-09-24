@@ -9,10 +9,11 @@
 # # ===== SETTINGS =====
 # SSID = "TP-Link_0260"
 # PASSWORD = "14579721"
-# SERVER_URL = "http://192.168.0.101:8000/api/sensor-data/"
-# STATE_URL = "http://192.168.0.101:8000/api/state/"
-# LOG_URL = "http://192.168.0.101:8000/api/watering-log/"
+# SERVER_URL = "http://192.168.0.103:8000/api/sensor-data/"
+# STATE_URL = "http://192.168.0.103:8000/api/state/"
+# LOG_URL = "http://192.168.0.103:8000/api/watering-log/"
 # DEVICE_ID = 1
+#
 # # Humidity sensor
 # sensor = ADC(Pin(34))
 # sensor.atten(ADC.ATTN_11DB)
@@ -66,6 +67,7 @@
 # def read_temperature():
 #     if not roms:
 #         return None
+#
 #     ds.start_conversion()
 #     time.sleep_ms(750)
 #     t = ds.read_temp_async()
@@ -84,7 +86,7 @@
 #
 #
 # def start_watering(source='auto'):
-#     """Запускает полив (только насос!)"""
+#     """Start watering (pump only!)"""
 #     global is_watering, start_time, start_time_str
 #     if is_watering:
 #         return
@@ -99,7 +101,7 @@
 #
 #
 # def stop_watering(source='auto'):
-#     """Останавливает полив (только насос!)"""
+#     """Stop watering (pump only!)"""
 #     global is_watering, start_time_str
 #     if not is_watering:
 #         return
@@ -111,26 +113,30 @@
 #     end_time_str = "{:02d}:{:02d}:{:02d}".format(now[3], now[4], now[5])
 #
 #     relay_pump.value(0)
+#
 #     print("Watering STOP at {} ({} sec)".format(end_time_str, duration))
 #
 #     send_watering_log(duration, source, start_time_str, end_time_str)
 #
 #
 # def relay_work_automatic():
-#     """Автоматический режим: насос + свет по влажности"""
+#     """Automatic mode"""
 #     h = read_humidity()
 #     if h < 30:
 #         start_watering('auto')
-#         relay_light.value(1)  # свет вместе с поливом
-#         print("Light: ON (auto)")
 #     elif h > 70:
 #         stop_watering('auto')
-#         relay_light.value(0)  # свет выключается
+#
+#     if is_watering:
+#         relay_light.value(1)  # light ON with watering
+#         print("Light: ON (auto)")
+#     else:
+#         relay_light.value(0)  # light OFF
 #         print("Light: OFF (auto)")
 #
 #
 # def relay_work_manual(pump_state):
-#     """Ручной режим: только насос, свет управляется отдельно"""
+#     """Manual mode (pump and light)"""
 #     if pump_state:
 #         start_watering('manual')
 #     else:
