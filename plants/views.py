@@ -10,10 +10,8 @@ from django.urls import reverse_lazy
 from .vk_service import vk_send_message
 import ctypes
 from pygrabber.dshow_graph import FilterGraph
-from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
-from django.shortcuts import render, redirect, get_object_or_404
-from .forms import PlantForm
+
 
 from .models import SensorData, DeviceState, CameraState, Plant
 from .serializers import SensorDataSerializer, CameraStateSerializer, WateringLogSerializer
@@ -280,8 +278,6 @@ class CameraStateAPIView(APIView):
         return Response({"ok": True, "is_on": state.is_on})
 
 
-
-
 class WateringLogAPIView(APIView):
     """API для записи логов полива"""
     def post(self, request):
@@ -306,7 +302,7 @@ class WateringLogAPIView(APIView):
         return Response({"error": serializer.errors}, status=400)
 
 
-# plants/views.py
+
 class PlantListView(LoginRequiredMixin, ListView):
     """
     Список растений с последними показаниями датчиков.
@@ -316,7 +312,7 @@ class PlantListView(LoginRequiredMixin, ListView):
     model = Plant
     template_name = 'plants_list.html'
     context_object_name = 'plants_data'
-    paginate_by = 6
+    paginate_by = 3
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -387,7 +383,7 @@ class PlantCreateView(LoginRequiredMixin, CreateView):
 class PlantUpdateView(LoginRequiredMixin, UpdateView):
     """
     Редактирование растения.
-    - Доступно только владельцу или администратору/модератору.
+    Доступно только владельцу или администратору/модератору.
     """
     model = Plant
     form_class = PlantForm
@@ -414,7 +410,7 @@ class PlantUpdateView(LoginRequiredMixin, UpdateView):
 class PlantDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     """
     Удаление растения.
-    - Доступно только администратору и модератору.
+    Доступно только администратору и модератору.
     """
     model = Plant
     template_name = 'plant_delete.html'

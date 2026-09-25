@@ -24,6 +24,7 @@ class Plant(models.Model):
     class Meta:
         verbose_name = "Растение"
         verbose_name_plural = "Растения"
+        ordering = ['name']
 
 class SensorData(models.Model):
     """Модель для хранения показаний датчиков"""
