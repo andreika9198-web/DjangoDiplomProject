@@ -1,24 +1,27 @@
-from django.core.management.base import BaseCommand
-from plants.models import Plant, SensorData
 import random
+
+from django.core.management.base import BaseCommand
+
+from plants.models import Plant, SensorData
+
 
 
 class Command(BaseCommand):
-    help = 'Симулирует данные для растения №2 на основе растения №1'
+    help = 'Симулирует данные для растения №3 на основе растения №2'
 
     def handle(self, *args, **options):
         try:
-            plant1 = Plant.objects.get(id=1)
-            plant2 = Plant.objects.get(id=2)
+            plant1 = Plant.objects.get(id=2)
+            plant2 = Plant.objects.get(id=3)
         except Plant.DoesNotExist:
-            self.stdout.write(self.style.ERROR('Растения с ID 1 или 2 не найдены'))
+            self.stdout.write(self.style.ERROR('Растения с ID 2 или 3 не найдены'))
             return
 
         # Последние данные растения 1
         latest = SensorData.objects.filter(plant=plant1).order_by('-created_at').first()
 
         if not latest:
-            self.stdout.write(self.style.ERROR('Нет данных для растения 1'))
+            self.stdout.write(self.style.ERROR('Нет данных для растения 2'))
             return
 
         # Создаём данные для растения 2 с небольшим отклонением

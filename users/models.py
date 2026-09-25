@@ -33,7 +33,6 @@ class User(AbstractUser):
     phone = models.CharField(
         max_length=35, verbose_name='Телефон', **NULLABLE)
 
-    # ← Заменяем telegram и max_messenger на vk_id
     vk_id = models.CharField(
         max_length=50, verbose_name='VK ID', **NULLABLE,
         help_text='ID пользователя ВКонтакте для уведомлений')
@@ -52,7 +51,3 @@ class User(AbstractUser):
         verbose_name_plural = 'Пользователи'
         ordering = ['id']
 
-
-from django.db import models
-
-# Create your models here.
