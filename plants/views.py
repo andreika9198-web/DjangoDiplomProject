@@ -1,27 +1,38 @@
+import ctypes
+
+import cv2
 from django.utils import timezone
 from rest_framework.views import APIView
 from rest_framework.response import Response
-
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-import cv2
 from django.http import StreamingHttpResponse, HttpResponse
 from django.views.generic import UpdateView, ListView, CreateView, DeleteView
 from django.urls import reverse_lazy
-from .vk_service import vk_send_message
-import ctypes
 from pygrabber.dshow_graph import FilterGraph
 from django.core.exceptions import PermissionDenied
+from django.shortcuts import render
 
 
+from .vk_service import vk_send_message
 from .models import SensorData, DeviceState, CameraState, Plant
-from .serializers import SensorDataSerializer, CameraStateSerializer, WateringLogSerializer
+from .serializers import SensorDataSerializer, WateringLogSerializer
 from devices.models import Device
+from .forms import PlantForm
 
 def index(request):
+    """
+    Главная страница сайта.
+    Отображает приветственную страницу с заголовком.
+    """
     return render(request, 'index.html', {'title': 'Главная'})
 
 
 class SensorDataAPIView(APIView):
+    """
+    API для приёма данных от ESP32.
+    Принимает POST-запросы с показаниями датчиков,
+    сохраняет их в БД и проверяет критические значения.
+    """
     def post(self, request):
         device_id = request.data.get('device')
 
@@ -153,6 +164,11 @@ class SensorDataAPIView(APIView):
 
 
 class DeviceStateAPIView(APIView):
+    """
+    API для управления состоянием устройства.
+    GET: возвращает текущее состояние (automatic, pump, light).
+    POST: обновляет состояние, сбрасывает pump/light при смене режима.
+    """
     def get(self, request):
         # Берём самую свежую запись
         state = DeviceState.objects.order_by('-updated_at').first()
@@ -200,6 +216,14 @@ class DeviceStateAPIView(APIView):
         return Response({"ok": True})
 
 def control(request):
+    """
+    Обновляет состояние устройства (кнопки на сайте).
+    Если режим изменился — сбрасывает pump и light в False.
+    Ожидает JSON:
+        {"automatic": true, "pump": false, "light": false}
+    Возвращает:
+        200: {"ok": true}
+    """
     state = DeviceState.objects.order_by('-updated_at').first()
     if state is None:
         state = DeviceState.objects.create(automatic=True, pump=False, light=False)
@@ -354,8 +378,6 @@ def device_state_page(request):
     })
 
 
-from django.shortcuts import render, redirect
-from .forms import PlantForm
 
 
 class PlantCreateView(LoginRequiredMixin, CreateView):

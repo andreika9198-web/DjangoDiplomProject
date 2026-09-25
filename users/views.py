@@ -1,14 +1,12 @@
 import random
 import string
 
-from django.shortcuts import render, reverse, redirect
+from django.shortcuts import render, redirect
 from django.contrib import messages
 from django.contrib.auth.views import (
-    LoginView, LogoutView, PasswordChangeView
-)
+    LoginView, LogoutView, PasswordChangeView)
 from django.views.generic import (
-    CreateView, UpdateView, DetailView, ListView
-)
+    CreateView, UpdateView, DetailView, ListView)
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 

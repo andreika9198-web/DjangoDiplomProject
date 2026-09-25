@@ -1,11 +1,12 @@
+import json
+import zoneinfo
+
 from django.shortcuts import render, get_object_or_404
 from django.db.models import Count, Avg, Max, Min
 from django.db.models.functions import TruncDate
-from plants.models import Plant, SensorData, WateringLog
-import json
 from django.http import JsonResponse
-import zoneinfo
 
+from plants.models import Plant, SensorData, WateringLog
 
 def analytics_index(request):
     """Главная страница аналитики"""
